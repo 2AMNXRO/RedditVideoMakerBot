@@ -111,12 +111,13 @@ def check_toml(template_file, config_file) -> Tuple[bool, Dict]:
     global config
     config = None
     try:
-        template = toml.load(template_file)
+        template = toml.load(template_file, _dict=dict)
     except Exception as error:
-        console.print(f"[red bold]Encountered error when trying to to load {template_file}: {error}")
+        console.print(f"[red bold]Encountered error when trying to load {template_file}: {error}")
         return False
     try:
-        config = toml.load(config_file)
+        with open(config_file, "r", encoding="utf-8") as f:
+            config = toml.load(f, _dict=dict)
     except toml.TomlDecodeError:
         console.print(
             f"""[blue]Couldn't read {config_file}.
@@ -127,7 +128,7 @@ Overwrite it?(y/n)"""
             return False
         else:
             try:
-                with open(config_file, "w") as f:
+                with open(config_file, "w", encoding="utf-8") as f:
                     f.write("")
             except:
                 console.print(
@@ -140,7 +141,7 @@ Overwrite it?(y/n)"""
 Creating it now."""
         )
         try:
-            with open(config_file, "x") as f:
+            with open(config_file, "x", encoding="utf-8") as f:
                 f.write("")
             config = {}
         except:
@@ -160,7 +161,7 @@ If you see any prompts, that means that you have unset/incorrectly set variables
 """
     )
     crawl(template, check_vars)
-    with open(config_file, "w") as f:
+    with open(config_file, "w", encoding="utf-8") as f:
         toml.dump(config, f)
     return config
 
