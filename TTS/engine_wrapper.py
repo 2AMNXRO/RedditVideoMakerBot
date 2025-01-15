@@ -174,9 +174,17 @@ class TTSEngine:
 
 def process_text(text: str, clean: bool = True):
     lang = settings.config["reddit"]["thread"]["post_lang"]
+    replace_library = settings.config["settings"]["replace_library"]
     new_text = sanitize_text(text) if clean else text
+    for old_word, new_word in replace_library.items():
+        new_text = re.sub(
+            rf"\b{re.escape(old_word)}\b",
+            lambda match: new_word.capitalize() if match.group(0)[0].isupper() else new_word,
+            new_text,
+            flags=re.IGNORECASE
+        )
     if lang:
         print_substep("Translating Text...")
-        translated_text = translators.translate_text(text, translator="google", to_language=lang)
+        translated_text = translators.translate_text(new_text, translator="google", to_language=lang)
         new_text = sanitize_text(translated_text)
     return new_text
