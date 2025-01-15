@@ -86,6 +86,7 @@ def get_screenshots_of_reddit_posts(reddit_object: dict, screenshot_num: int):
             color_scheme="dark",
             viewport=ViewportSize(width=W, height=H),
             device_scale_factor=dsf,
+            java_script_enabled=True,
             user_agent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36",
         )
         cookies = json.load(cookie_file)
@@ -177,12 +178,16 @@ def get_screenshots_of_reddit_posts(reddit_object: dict, screenshot_num: int):
                 # zoom the body of the page
                 page.evaluate("document.body.style.zoom=" + str(zoom))
                 # as zooming the body doesn't change the properties of the divs, we need to adjust for the zoom
-                location = page.locator('[data-test-id="post-content"]').bounding_box()
+                location = page.locator(f'shreddit-post[id="t3_{reddit_id}"]').bounding_box()
                 for i in location:
                     location[i] = float("{:.2f}".format(location[i] * zoom))
                 page.screenshot(clip=location, path=postcontentpath)
             else:
-                page.locator('[data-test-id="post-content"]').screenshot(path=postcontentpath)
+                page.evaluate(f"""
+                    document.getElementById("t3_{reddit_id}-post-rtjson-content").remove();
+                """)
+                page.wait_for_timeout(1000)
+                page.locator(f'shreddit-post[id="t3_{reddit_id}"]').screenshot(path=postcontentpath)
         except Exception as e:
             print_substep("Something went wrong!", style="red")
             resp = input(
@@ -251,9 +256,34 @@ def get_screenshots_of_reddit_posts(reddit_object: dict, screenshot_num: int):
                             path=f"assets/temp/{reddit_id}/png/comment_{idx}.png",
                         )
                     else:
-                        page.locator(f"#t1_{comment['comment_id']}").screenshot(
-                            path=f"assets/temp/{reddit_id}/png/comment_{idx}.png"
-                        )
+                        try:
+                            page.wait_for_timeout(2000)
+                            page.evaluate(r"""
+                                const shredditCommentTree = document.querySelector('shreddit-comment-tree');
+                                if (shredditCommentTree) {
+                                    const shredditComment = shredditCommentTree.querySelector('shreddit-comment');
+                                    if (shredditComment) {
+                                        const details = shredditComment.shadowRoot.querySelector('details');
+                                        if (details) {
+                                            const contentsDivs = details.querySelectorAll('.contents');
+                                            if (contentsDivs.length > 1) {
+                                                const button = contentsDivs[1].querySelector('button[aria-controls="comment-children"]');
+                                                if (button) {
+                                                    button.click();
+                                                } 
+                                            } 
+                                        } 
+                                    } 
+                                }
+                            """)
+                            page.wait_for_timeout(2000)
+                            element = page.locator(f'shreddit-comment[thingid="t1_{comment["comment_id"]}"]')
+                            element.wait_for()
+                            element.screenshot(
+                                path=f"assets/temp/{reddit_id}/png/comment_{idx}.png"
+                            )
+                        except Exception as e:
+                            print(f"Error occurred for comment ID: {comment['comment_id']}. Error: {str(e)}")
                 except TimeoutError:
                     del reddit_object["comments"]
                     screenshot_num += 1
