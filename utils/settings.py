@@ -111,13 +111,13 @@ def check_toml(template_file, config_file) -> Tuple[bool, Dict]:
     global config
     config = None
     try:
-        template = toml.load(template_file, _dict=dict)
+        template = toml.load(template_file)
     except Exception as error:
         console.print(f"[red bold]Encountered error when trying to load {template_file}: {error}")
         return False
     try:
         with open(config_file, "r", encoding="utf-8") as f:
-            config = toml.load(f, _dict=dict)
+            config = toml.load(f)
     except toml.TomlDecodeError:
         console.print(
             f"""[blue]Couldn't read {config_file}.
@@ -150,6 +150,15 @@ Creating it now."""
             )
             return False
 
+    if 'settings' not in config:
+        config['settings'] = {}
+
+    # Add the replace library if doesn't exists
+    if 'word_library' not in config['settings']: 
+        config['settings']['replace_library'] = {
+            "idk": "i dont know"
+        }
+        
     console.print(
         """\
 [blue bold]###############################
