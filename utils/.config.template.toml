@@ -20,6 +20,8 @@ ai_similarity_enabled = {optional = true, option = [true, false], default = fals
 ai_similarity_keywords = {optional = true, type="str", example= 'Elon Musk, Twitter, Stocks', explanation = "Every keyword or even sentence, seperated with comma, is used to sort the reddit threads based on similarity"}
 
 [settings]
+render_device = { optional = false, default = "cpu", example = "gpu", explanation = "Change the rendering device for faster render (Support only nvidia cards. Must have CUDA Toolkit installed)" }
+one_word = { optional = true, default = 0, example = 1, explanation = "Show only one word per time on the screen instead of the entire phrase (Works only with story mode)" }
 allow_nsfw = { optional = false, type = "bool", default = false, example = false, options = [true, false, ], explanation = "Whether to allow NSFW content, True or False" }
 theme = { optional = false, default = "dark", example = "light", options = ["dark", "light", "transparent", ], explanation = "Sets the Reddit theme, either LIGHT or DARK. For story mode you can also use a transparent background." }
 times_to_run = { optional = false, default = 1, example = 2, explanation = "Used if you want to run multiple times. Set to an int e.g. 4 or 29 or 1", type = "int", nmin = 1, oob_error = "It's very hard to run something less than once." }
