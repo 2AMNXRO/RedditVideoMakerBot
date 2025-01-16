@@ -164,7 +164,7 @@ def create_fancy_thumbnail(image, text, text_color, padding, wrap=35):
         )
 
     for line in lines:
-        draw.text((50, y), line, font=font, fill=text_color, align="left")
+        draw.text((120, y), line, font=font, fill=text_color, align="left")
         y += getheight(font, line) + padding
 
     return image
