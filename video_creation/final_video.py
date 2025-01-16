@@ -5,7 +5,6 @@ import tempfile
 import textwrap
 import threading
 import time
-import glob2
 from os.path import exists  # Needs to be imported specifically
 from pathlib import Path
 from typing import Dict, Final, Tuple
@@ -17,6 +16,7 @@ from rich.console import Console
 from rich.progress import track
 
 from utils import settings
+from utils import capcut
 from utils.cleanup import cleanup
 from utils.console import print_step, print_substep
 from utils.fonts import getheight
@@ -66,9 +66,6 @@ class ProgressFfmpeg(threading.Thread):
     def __exit__(self, *args, **kwargs):
         self.stop()
 
-def numerical_sort(value):
-    parts = re.findall(r'[A-Za-z]+|\d+', value)
-    return [int(x) if x.isdigit() else x for x in parts]
 
 def name_normalize(name: str) -> str:
     name = re.sub(r'[?\\"%*:|<>]', "", name)
@@ -167,7 +164,7 @@ def create_fancy_thumbnail(image, text, text_color, padding, wrap=35):
         )
 
     for line in lines:
-        draw.text((120, y), line, font=font, fill=text_color, align="left")
+        draw.text((50, y), line, font=font, fill=text_color, align="left")
         y += getheight(font, line) + padding
 
     return image
@@ -212,8 +209,6 @@ def make_final_video(
 
     opacity = settings.config["settings"]["opacity"]
 
-    one_word_mode = settings.config["settings"]["one_word"]
-    
     reddit_id = re.sub(r"[^\w\s-]", "", reddit_obj["thread_id"])
 
     allowOnlyTTSFolder: bool = (
@@ -285,6 +280,7 @@ def make_final_video(
         title = name_normalize(title)
         font_color = "#000000"
         padding = 5
+        # create_fancy_thumbnail(image, text, text_color, padding
         title_img = create_fancy_thumbnail(title_template, title, font_color, padding)
         title_img.save(f"assets/temp/{reddit_id}/png/title.png")
     image_clips.insert(
@@ -321,53 +317,26 @@ def make_final_video(
             )
             current_time += audio_clips_durations[0]
         elif settings.config["settings"]["storymodemethod"] == 1:
-            number_of_clips = len(glob2.glob(f"assets/temp/{reddit_id}/mp3/postaudio-*.mp3"))
-
-            audio_clips_durations = [
-                float(ffmpeg.probe(f"assets/temp/{reddit_id}/mp3/postaudio-{i}.mp3")["format"]["duration"])
-                for i in range(number_of_clips)
-            ]
-            audio_clips_durations.insert(
-                0,
-                float(ffmpeg.probe(f"assets/temp/{reddit_id}/mp3/title.mp3")["format"]["duration"]),
-            )
-        
-            if one_word_mode:
-                thumbnail_clip = ffmpeg.input(f"assets/temp/{reddit_id}/png/title.png")["v"].filter(
-                    "scale", screenshot_width, -1
+            if settings.config['settings']['capcut_captions']:
+                total_audio_duration = float(
+                    ffmpeg.probe(f"assets/temp/{reddit_id}/audio.mp3")["format"]["duration"]
+                ) - float(
+                    ffmpeg.probe(f"assets/temp/{reddit_id}/mp3/title.mp3")["format"]["duration"]
                 )
+
+                time_for_clip = float(ffmpeg.probe(f"assets/temp/{reddit_id}/mp3/title.mp3")["format"]["duration"])
+                image_clips.append(
+                    ffmpeg.input(f"assets/temp/{reddit_id}/png/img{0}.png")["v"].filter(
+                        "scale", screenshot_width, -1
+                    )
+                )
+
                 background_clip = background_clip.overlay(
-                    thumbnail_clip,
-                    enable=f"between(t,0,{audio_clips_durations[0]})",
+                    image_clips[0],
+                    enable=f"between(t,{current_time},{current_time + time_for_clip})",
                     x="(main_w-overlay_w)/2",
                     y="(main_h-overlay_h)/2",
                 )
-                current_time = audio_clips_durations[0]
-                num_tracks = number_of_clips
-        
-                for i in range(num_tracks):
-                    track_duration = audio_clips_durations[i + 1]
-                    images_for_track = sorted(glob2.glob(f"assets/temp/{reddit_id}/png/img{i}_*.png"), key=numerical_sort)
-                    num_images_for_track = len(images_for_track)
-        
-                    if num_images_for_track == 0:
-                        current_time += track_duration
-                        continue
-        
-                    duration_per_image = track_duration / num_images_for_track
-                    for j, image_path in enumerate(images_for_track):
-                        start_time = current_time + (j * duration_per_image)
-                        end_time = start_time + duration_per_image
-                        if j == num_images_for_track - 1:
-                            end_time = current_time + track_duration
-                        background_clip = background_clip.overlay(
-                            ffmpeg.input(image_path)["v"].filter("scale", screenshot_width, -1),
-                            enable=f"between(t,{start_time:.2f},{end_time:.2f})",
-                            x="(main_w-overlay_w)/2",
-                            y="(main_h-overlay_h)/2",
-                        )
-
-                    current_time += track_duration
             else:
                 for i in track(range(0, number_of_clips + 1), "Collecting the image files..."):
                     image_clips.append(
@@ -533,6 +502,12 @@ def make_final_video(
         old_percentage = pbar.n
         pbar.update(100 - old_percentage)
     pbar.close()
+
+    if settings.config["settings"]["capcut_captions"]:
+        print_step("Adding CapCut captions 📝")
+        file_path = os.getcwd() + f"/results/{subreddit}/{filename}.mp4"
+        capcut.generate_captions(file_path, filename)
+
     save_data(subreddit, filename + ".mp4", title, idx, background_config["video"][2])
     print_step("Removing temporary files 🗑")
     cleanups = cleanup(reddit_id)
