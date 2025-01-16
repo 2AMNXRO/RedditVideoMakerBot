@@ -154,7 +154,7 @@ Creating it now."""
         config['settings'] = {}
 
     # Add the replace library if doesn't exists
-    if 'word_library' not in config['settings']: 
+    if 'replace_library' not in config['settings']: 
         config['settings']['replace_library'] = {
             "idk": "i dont know"
         }
