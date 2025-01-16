@@ -502,11 +502,12 @@ def make_final_video(
         old_percentage = pbar.n
         pbar.update(100 - old_percentage)
     pbar.close()
-
-    if settings.config["settings"]["capcut_captions"]:
-        print_step("Adding CapCut captions 📝")
-        file_path = os.getcwd() + f"/results/{subreddit}/{filename}.mp4"
-        capcut.generate_captions(file_path, filename)
+    
+    if settings.config["settings"]["storymode"]:
+        if settings.config["settings"]["capcut_captions"]:
+            print_step("Adding CapCut captions 📝")
+            file_path = os.getcwd() + f"/results/{subreddit}/{filename}.mp4"
+            capcut.generate_captions(file_path, filename)
 
     save_data(subreddit, filename + ".mp4", title, idx, background_config["video"][2])
     print_step("Removing temporary files 🗑")
