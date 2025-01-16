@@ -186,9 +186,13 @@ def get_screenshots_of_reddit_posts(reddit_object: dict, screenshot_num: int):
                     location[i] = float("{:.2f}".format(location[i] * zoom))
                 page.screenshot(clip=location, path=postcontentpath)
             else:
-                page.evaluate(f"""
-                    document.getElementById("t3_{reddit_id}-post-rtjson-content").remove();
-                """)
+                if not storymode:
+                    page.evaluate(f"""
+                        var element = document.getElementById("t3_{reddit_id}-post-rtjson-content");
+                        if (element) {{
+                            element.remove();
+                        }}
+                    """)
                 page.wait_for_timeout(1000)
                 page.locator(f'shreddit-post[id="t3_{reddit_id}"]').screenshot(path=postcontentpath)
         except Exception as e:
