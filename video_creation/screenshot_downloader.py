@@ -60,14 +60,17 @@ def get_screenshots_of_reddit_posts(reddit_object: dict, screenshot_num: int):
         transparent = False
 
     if storymode and settings.config["settings"]["storymodemethod"] == 1:
-        # for idx,item in enumerate(reddit_object["thread_post"]):
-        print_substep("Generating images...")
-        return imagemaker(
-            theme=bgcolor,
-            reddit_obj=reddit_object,
-            txtclr=txtcolor,
-            transparent=transparent,
-        )
+        if not settings.config['settings']['capcut_captions']:
+            # for idx,item in enumerate(reddit_object["thread_post"]):
+            print_substep("Generating images...")
+            return imagemaker(
+                theme=bgcolor,
+                reddit_obj=reddit_object,
+                txtclr=txtcolor,
+                transparent=transparent,
+            )
+        else:
+            return
 
     screenshot_num: int
     with sync_playwright() as p:
