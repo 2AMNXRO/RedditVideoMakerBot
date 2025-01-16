@@ -328,12 +328,10 @@ def generate_captions(file_path, title):
                     content_downloaded = True 
 
         dl = download_info.value
-        print(dl.path())
         working_dir_path = os.getcwd()
 
         os.makedirs(os.path.join(working_dir_path, "capcut_results", "videos"), exist_ok=True)
 
         final_path = os.path.join(working_dir_path, "capcut_results", "videos", video_file_name + ".mp4")
-        print(final_path)
         dl.save_as(final_path)
         browser.close()
