@@ -5,7 +5,6 @@ from elevenlabs.client import ElevenLabs
 
 from utils import settings
 
-
 class elevenlabs:
     def __init__(self):
         self.max_chars = 2500
@@ -35,4 +34,7 @@ class elevenlabs:
     def randomvoice(self):
         if self.client is None:
             self.initialize()
-        return random.choice(self.client.voices.get_all().voices).voice_name
+        voices = self.client.voices.get_all().voices
+        if not voices:
+            raise ValueError("No voices available in ElevenLabs.")
+        return random.choice(voices).name
