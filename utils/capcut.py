@@ -209,7 +209,10 @@ def generate_captions(file_path, title):
 
         page.wait_for_timeout(2000)
 
-        page.click("//div[normalize-space()='Auto captions']")
+        try:
+            page.click("//div[@id='text-intelligent-detect-text']", timeout=8000)
+        except:
+            pass
 
         video_ready = False
         while not video_ready:
@@ -319,19 +322,15 @@ def generate_captions(file_path, title):
         time.sleep(35)
 
         with page.expect_download() as download_info:
-            content_downloaded = False
-            while not content_downloaded:
-                if not page.locator("//button[.//span[text()='Download']]").is_visible():
-                    time.sleep(5)
-                else:
-                    print("Video exported, proceeding")
-                    content_downloaded = True 
+            print("Downloading exported video...")
+            download = download_info.value
 
-        dl = download_info.value
+        print("Video downloaded, proceeding")
+
         working_dir_path = os.getcwd()
 
         os.makedirs(os.path.join(working_dir_path, "capcut_results", "videos"), exist_ok=True)
 
         final_path = os.path.join(working_dir_path, "capcut_results", "videos", video_file_name + ".mp4")
-        dl.save_as(final_path)
+        download.save_as(final_path)
         browser.close()
