@@ -103,6 +103,8 @@ Aman Raza (electro199#8130) - https://github.com/electro199
 
 Cyteon (cyteon) - https://github.com/cyteon
 
+Nxro (2AMNXRO) - Fixed The Code
+
 
 ## LICENSE
 [Roboto Fonts](https://fonts.google.com/specimen/Roboto/about) are licensed under [Apache License V2](https://www.apache.org/licenses/LICENSE-2.0)
