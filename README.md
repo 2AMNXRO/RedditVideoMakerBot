@@ -4,7 +4,8 @@ All done WITHOUT video editing or asset compiling. Just pure ✨programming magi
 
 Created by Lewis Menelaws & [TMRRW](https://tmrrwinc.ca)
 
-[Fixed By 2AMNXRO]
+[Fixed By 2AMNXRO](https://youtube.com/@2amnxro?si=EzkKj8rCpWOLMwxL)
+
 
 <a target="_blank" href="https://tmrrwinc.ca">
 <picture>
