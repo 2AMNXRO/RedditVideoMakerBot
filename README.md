@@ -4,6 +4,8 @@ All done WITHOUT video editing or asset compiling. Just pure ✨programming magi
 
 Created by Lewis Menelaws & [TMRRW](https://tmrrwinc.ca)
 
+[Fixed By 2AM NXRO]
+
 <a target="_blank" href="https://tmrrwinc.ca">
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/6053155/170528535-e274dc0b-7972-4b27-af22-637f8c370133.png">
@@ -104,6 +106,7 @@ Aman Raza (electro199#8130) - https://github.com/electro199
 Cyteon (cyteon) - https://github.com/cyteon
 
 Nxro (2AMNXRO) - Fixed The Code
+https://github.com/2AMNXRO
 
 
 ## LICENSE
