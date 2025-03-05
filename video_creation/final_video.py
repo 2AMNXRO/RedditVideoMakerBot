@@ -341,7 +341,7 @@ def make_final_video(
                 for i in track(range(0, number_of_clips + 1), "Collecting the image files..."):
                     image_clips.append(
                         ffmpeg.input(f"assets/temp/{reddit_id}/png/img{i}.png")["v"].filter(
-                            "scale", `(screenshot_width * 0.7)`
+                           "scale", screenshot_width, -1
                         )
                     )
                     background_clip = background_clip.overlay(
